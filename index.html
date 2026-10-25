@@ -61,6 +61,10 @@
       cursor: pointer;
     }
 
+    select {
+      padding: 0.4rem;
+    }
+
     .credit {
       font-size: 0.8rem;
       color: #514538;
@@ -71,20 +75,43 @@
   <h1>Powder Game</h1>
   <p>本地运行，无需联网。点击或拖动鼠标开始游玩。</p>
   <main id="game">
+    <label for="version">版本：</label>
+    <select id="version">
+      <option value="standard">标准版（20,000／30,000／40,000）</option>
+      <option value="extended">扩展版（60,000／90,000／120,000）</option>
+    </select>
     <canvas id="cv" width="400" height="456" aria-label="Powder Game simulation"></canvas>
     <button id="fullscreen" type="button">全屏</button>
   </main>
   <p class="credit">Powder Game © 2007 ha55ii / DAN-BALL</p>
-  <a href="https://github.com/isHuaMouRen/Powder-Game-Offline" class="credit">https://github.com/isHuaMouRen/Powder-Game-Offline</p>
-  <script src="./javagame/dust/dust.js"></script>
+  <a href="https://github.com/isHuaMouRen/Powder-Game-Offline" class="credit">https://github.com/isHuaMouRen/Powder-Game-Offline</a>
   <script>
-    // The authorized offline copy should not be blocked by the original domain check.
-    window.zb = function () {
-      window.Ob = 0;
-      window.zf = 11;
-      return false;
+    const versionSelect = document.getElementById("version");
+    const params = new URLSearchParams(window.location.search);
+    const version = params.get("version") === "extended" ? "extended" : "standard";
+    versionSelect.value = version;
+    versionSelect.addEventListener("change", function () {
+      params.set("version", versionSelect.value);
+      window.location.search = params.toString();
+    });
+
+    const gameScript = document.createElement("script");
+    gameScript.src = version === "extended"
+      ? "./javagame/dust/dust-unlimited.js"
+      : "./javagame/dust/dust.js";
+    gameScript.onload = function () {
+      // The authorized offline copy should not be blocked by the original domain check.
+      window.zb = function () {
+        window.Ob = 0;
+        window.zf = 11;
+        return false;
+      };
+      Init("", 1, "");
     };
-    Init("", 1, "");
+    gameScript.onerror = function () {
+      document.getElementById("game").insertAdjacentText("beforeend", " 游戏脚本加载失败。");
+    };
+    document.body.appendChild(gameScript);
 
     document.getElementById("fullscreen").addEventListener("click", async function () {
       const game = document.getElementById("game");
