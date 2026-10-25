@@ -41,19 +41,35 @@
       touch-action: none;
     }
 
+    .game-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     #game:fullscreen {
       box-sizing: border-box;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       padding: 1rem;
       display: grid;
-      place-content: center;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 0.75rem;
       background: #ece4d1;
     }
 
     #game:fullscreen canvas {
-      width: min(100%, 400px);
-      max-height: calc(100vh - 5rem);
+      width: auto;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      justify-self: center;
+      align-self: center;
+    }
+
+    #game:fullscreen button {
+      justify-self: center;
     }
 
     button {
@@ -75,13 +91,15 @@
   <h1>Powder Game</h1>
   <p>本地运行，无需联网。点击或拖动鼠标开始游玩。</p>
   <main id="game">
-    <label for="version">版本：</label>
-    <select id="version">
-      <option value="standard">标准版（20,000／30,000／40,000）</option>
-      <option value="extended">扩展版（60,000／90,000／110,000／120,000 MAX）</option>
-    </select>
+    <div class="game-controls">
+      <label for="version">版本：</label>
+      <select id="version">
+        <option value="standard">标准版（20,000／30,000／40,000）</option>
+        <option value="extended">扩展版（60,000／90,000／110,000／120,000 MAX）</option>
+      </select>
+    </div>
     <canvas id="cv" width="400" height="456" aria-label="Powder Game simulation"></canvas>
-    <button id="fullscreen" type="button">全屏</button>
+    <button id="fullscreen" type="button" aria-pressed="false">全屏</button>
   </main>
   <p class="credit">Powder Game © 2007 ha55ii / DAN-BALL</p>
   <a href="https://github.com/isHuaMouRen/Powder-Game-Offline" class="credit">https://github.com/isHuaMouRen/Powder-Game-Offline</a>
@@ -130,7 +148,13 @@
     };
     document.body.appendChild(gameScript);
 
-    document.getElementById("fullscreen").addEventListener("click", async function () {
+    const fullscreenButton = document.getElementById("fullscreen");
+    document.addEventListener("fullscreenchange", function () {
+      const isFullscreen = document.fullscreenElement === document.getElementById("game");
+      fullscreenButton.textContent = isFullscreen ? "退出全屏" : "全屏";
+      fullscreenButton.setAttribute("aria-pressed", String(isFullscreen));
+    });
+    fullscreenButton.addEventListener("click", async function () {
       const game = document.getElementById("game");
       if (document.fullscreenElement) {
         await document.exitFullscreen();
